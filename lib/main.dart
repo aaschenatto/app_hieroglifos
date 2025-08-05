@@ -144,7 +144,17 @@ class _TelaInicialState extends State<TelaInicial> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Câmera Flutter')),
+      appBar: AppBar(
+        title: Center(
+          child: Image.asset(
+        'images/oraculum_logo.png',
+        height: 48,
+          ),
+        ),
+        backgroundColor: Color(0xffBEA073),
+        elevation: 2,
+      ),
+      
       body: _isCameraInitialized
           ? Column(
               children: [
@@ -174,16 +184,22 @@ class _TelaInicialState extends State<TelaInicial> {
                   ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton.icon(
-                    icon: Icon(Icons.camera),
-                    label: Text('Tirar Foto'),
-                    onPressed: _isLoading ? null : _takePicture,
-                  ),
+                    child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Color(0xffBEA073), width: 2.0),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      onPressed: _isLoading ? null : _takePicture,
+                      icon: Icon(Icons.camera_enhance_rounded),
+                    ),
+                    )
                 ),
               ],
             )
           : Center(child: CircularProgressIndicator()),
-    );
+    ); //aaaaaaaaaaaaaaaaaa
   }
 }
 
