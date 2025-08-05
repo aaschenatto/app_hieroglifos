@@ -8,9 +8,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 late List<CameraDescription> _cameras;
 
-
-       
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
@@ -29,7 +26,7 @@ class _TelaInicialState extends State<TelaInicial> {
   String? _imagePath;
   String? _translation;
   bool _isLoading = false;
-  String apiKey = dotenv.get('apiKey');
+  String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 
   @override
   void initState() {
@@ -70,43 +67,41 @@ class _TelaInicialState extends State<TelaInicial> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Foto salva em $imagePath')),
         );
-        await _sendToOpenAI(imagePath);
+        await _sendToGemini(imagePath);
       });
     } catch (e) {
       print(e);
     }
   }
 
-  Future<void> _sendToOpenAI(String imagePath) async {
+  Future<void> _sendToGemini(String imagePath) async {
     setState(() {
       _isLoading = true;
       _translation = null;
     });
 
-    final url = Uri.parse('https://api.openai.com/v1/chat/completions');
+    final url = Uri.parse(
+        'https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent?key=$apiKey');
     final bytes = await File(imagePath).readAsBytes();
     final base64Image = base64Encode(bytes);
 
     final body = jsonEncode({
-      "model": "gpt-4-vision-preview",
-      "messages": [
+      "contents": [
         {
-          "role": "user",
-          "content": [
+          "parts": [
             {
-              "type": "text",
-              "text": "Traduza os hieróglifos egípcios desta imagem para português. Se não houver hieróglifos, responda apenas 'Nenhum hieróglifo encontrado.'"
+              "text":
+                  "Traduza os hieróglifos egípcios desta imagem para português. Se não houver hieróglifos, responda apenas 'Nenhum hieróglifo encontrado.'"
             },
             {
-              "type": "image_url",
-              "image_url": {
-                "url": "data:image/jpeg;base64,$base64Image"
+              "inlineData": {
+                "mimeType": "image/jpeg",
+                "data": base64Image
               }
             }
           ]
         }
-      ],
-      "max_tokens": 300
+      ]
     });
 
     try {
@@ -114,14 +109,26 @@ class _TelaInicialState extends State<TelaInicial> {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
         },
         body: body,
       );
 
+      print('Status: ${response.statusCode}');
+      print('Body: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final result = data['choices'][0]['message']['content'];
+        // Tente extrair o texto de diferentes formas
+        String? result;
+        try {
+          result = data['candidates']?[0]?['content']?['parts']?[0]?['text'];
+        } catch (_) {}
+        result ??= data['candidates']?[0]?['content']?['parts']?[0]?.toString();
+        result ??= data['candidates']?[0]?['content']?['parts']?.toString();
+        result ??= data['candidates']?[0]?['content']?.toString();
+        result ??= data['candidates']?[0]?.toString();
+        result ??= 'Sem resposta da IA';
+
         setState(() {
           _translation = result;
         });
@@ -132,7 +139,7 @@ class _TelaInicialState extends State<TelaInicial> {
       }
     } catch (e) {
       setState(() {
-        _translation = 'Erro ao conectar à API: $e';
+        _translation = 'Erro ao conectar à API Gemini: $e';
       });
     } finally {
       setState(() {
@@ -147,14 +154,13 @@ class _TelaInicialState extends State<TelaInicial> {
       appBar: AppBar(
         title: Center(
           child: Image.asset(
-        'images/oraculum_logo.png',
-        height: 48,
+            'images/oraculum_logo.png',
+            height: 48,
           ),
         ),
         backgroundColor: Color(0xffBEA073),
         elevation: 2,
       ),
-      
       body: _isCameraInitialized
           ? Column(
               children: [
@@ -184,7 +190,7 @@ class _TelaInicialState extends State<TelaInicial> {
                   ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                    child: Container(
+                  child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(color: Color(0xffBEA073), width: 2.0),
@@ -194,12 +200,12 @@ class _TelaInicialState extends State<TelaInicial> {
                       onPressed: _isLoading ? null : _takePicture,
                       icon: Icon(Icons.camera_enhance_rounded),
                     ),
-                    )
+                  ),
                 ),
               ],
             )
           : Center(child: CircularProgressIndicator()),
-    ); //aaaaaaaaaaaaaaaaaa
+    );
   }
 }
 
