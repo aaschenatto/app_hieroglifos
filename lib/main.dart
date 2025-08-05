@@ -164,7 +164,17 @@ class _TelaInicialState extends State<TelaInicial> {
       body: _isCameraInitialized
           ? Column(
               children: [
-                Expanded(child: CameraPreview(_controller)),
+                Expanded(
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16), // opcional: cantos arredondados
+                        child: CameraPreview(_controller),
+                      ),
+                    ),
+                  ),
+                ),
                 if (_imagePath != null)
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -205,7 +215,7 @@ class _TelaInicialState extends State<TelaInicial> {
               ],
             )
           : Center(child: CircularProgressIndicator()),
-    );
+    ); //aaaaaaaaaaaaaaaaaa
   }
 }
 
