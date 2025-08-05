@@ -164,13 +164,20 @@ class _TelaInicialState extends State<TelaInicial> {
       body: _isCameraInitialized
           ? Column(
               children: [
+                SizedBox(height: 16), // Espaço entre o título e a câmera
                 Expanded(
                   child: Center(
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16), // opcional: cantos arredondados
-                        child: CameraPreview(_controller),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 4), // Borda preta
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: CameraPreview(_controller),
+                        ),
                       ),
                     ),
                   ),
