@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:convert';
 
@@ -29,6 +30,7 @@ class _TelaInicialState extends State<TelaInicial> {
   bool _isLoading = false;
   String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
   final TextEditingController _textController = TextEditingController();
+  File? _image;
 
   @override
   void initState() {
@@ -67,6 +69,17 @@ class _TelaInicialState extends State<TelaInicial> {
     });
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _image = File(pickedFile.path);
+      });
+    }
+  }
+
   Future<void> _takePicture() async {
     if (!_controller.value.isInitialized) return;
 
@@ -100,6 +113,7 @@ class _TelaInicialState extends State<TelaInicial> {
       setState(() {
         _translation = 'Chave de API não encontrada. Verifique o arquivo .env.';
       });
+      debugPrint('[DEBUG] API Key vazia');
       return;
     }
 
@@ -130,6 +144,11 @@ class _TelaInicialState extends State<TelaInicial> {
       ],
     });
 
+    debugPrint('[DEBUG] Enviando requisição para Gemini...');
+    debugPrint('[DEBUG] URL: $url');
+    debugPrint('[DEBUG] Tamanho da imagem base64: ${base64Image.length}');
+    debugPrint('[DEBUG] Corpo da requisição:\n$body');
+
     try {
       final response = await http.post(
         url,
@@ -137,14 +156,17 @@ class _TelaInicialState extends State<TelaInicial> {
         body: body,
       );
 
-      debugPrint(response.body);
+      debugPrint('[DEBUG] Status da resposta: ${response.statusCode}');
+      debugPrint('[DEBUG] Corpo da resposta:\n${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         String? result;
         try {
           result = data['candidates']?[0]?['content']?['parts']?[0]?['text'];
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('[DEBUG] Erro ao extrair resultado da resposta: $e');
+        }
         result ??= 'Sem resposta da IA';
 
         setState(() {
@@ -160,6 +182,7 @@ class _TelaInicialState extends State<TelaInicial> {
       setState(() {
         _translation = 'Erro ao conectar à API Gemini: $e';
       });
+      debugPrint('[DEBUG] Exceção na requisição: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -172,7 +195,7 @@ class _TelaInicialState extends State<TelaInicial> {
     return Scaffold(
       appBar: AppBar(
         title: Center(
-          child: Image.asset('images/oraculum_logo.png', height: 48),
+          child: Image.asset('assets/images/oraculum_logo.png', height: 48),
         ),
         backgroundColor: Color(0xffBEA073),
         elevation: 2,
@@ -223,16 +246,39 @@ class _TelaInicialState extends State<TelaInicial> {
                   ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(color: Color(0xffBEA073), width: 2.0),
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      onPressed: _isLoading ? null : _takePicture,
-                      icon: Icon(Icons.camera_enhance_rounded),
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Color(0xffBEA073),
+                            width: 2.0,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: _isLoading ? null : _takePicture,
+                          icon: Icon(Icons.camera_enhance_rounded),
+                        ),
+                      ),
+                      SizedBox(width: 24),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Color(0xffBEA073),
+                            width: 2.0,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: _isLoading ? null : _pickImage,
+                          icon: Icon(Icons.photo_library_rounded),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
