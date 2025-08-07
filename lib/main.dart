@@ -121,11 +121,11 @@ Future<void> _sendToGemini(String imagePath) async {
     _translation = null;
   });
 
-  final url = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=$apiKey');
-
-  final bytes = await File(imagePath).readAsBytes();
-  final base64Image = base64Encode(bytes);
+    final url = Uri.parse(
+      'https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent?key=$apiKey',
+    );
+    final bytes = await File(imagePath).readAsBytes();
+    final base64Image = base64Encode(bytes);
 
   final body = jsonEncode({
     "contents": [
