@@ -123,7 +123,7 @@ class _TelaInicialState extends State<TelaInicial> {
     });
 
     final url = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent?key=$apiKey',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=$apiKey',
     );
     final bytes = await File(imagePath).readAsBytes();
     final base64Image = base64Encode(bytes);
