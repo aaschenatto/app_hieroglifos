@@ -108,41 +108,81 @@ class _TelaInicialState extends State<TelaInicial> {
     }
   }
 
-  Future<void> _sendToGemini(String imagePath) async {
-    if (apiKey.isEmpty) {
-      setState(() {
-        _translation = 'Chave de API não encontrada. Verifique o arquivo .env.';
-      });
-      debugPrint('[DEBUG] API Key vazia');
-      return;
-    }
-
+Future<void> _sendToGemini(String imagePath) async {
+  if (apiKey.isEmpty) {
     setState(() {
-      _isLoading = true;
-      _translation = null;
+      _translation = 'Chave de API não encontrada. Verifique o arquivo .env.';
     });
+    return;
+  }
 
-    final url = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent?key=$apiKey',
+  setState(() {
+    _isLoading = true;
+    _translation = null;
+  });
+
+  final url = Uri.parse(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=$apiKey');
+
+  final bytes = await File(imagePath).readAsBytes();
+  final base64Image = base64Encode(bytes);
+
+  final body = jsonEncode({
+    "contents": [
+      {
+        "parts": [
+          {
+            "text":
+                "Traduza os hieróglifos egípcios desta imagem para português. Se não houver hieróglifos, responda apenas 'Nenhum hieróglifo encontrado.'"
+          },
+          {
+            "inline_data": {
+              "mime_type": "image/jpeg",
+              "data": base64Image,
+            }
+          }
+        ]
+      }
+    ]
+  });
+
+  try {
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: body,
     );
-    final bytes = await File(imagePath).readAsBytes();
-    final base64Image = base64Encode(bytes);
 
-    final body = jsonEncode({
-      "contents": [
-        {
-          "parts": [
-            {
-              "text":
-                  "Traduza os hieróglifos egípcios desta imagem para português. Se não houver hieróglifos, responda apenas 'Nenhum hieróglifo encontrado.'",
-            },
-            {
-              "inlineData": {"mimeType": "image/jpeg", "data": base64Image},
-            },
-          ],
-        },
-      ],
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      String? result;
+      try {
+        result = data['candidates'][0]['content']['parts'][0]['text'];
+      } catch (e) {
+        result = 'Erro ao interpretar resposta da IA.';
+      }
+
+      setState(() {
+        _translation = result;
+        _textController.text = result ?? '';
+      });
+    } else {
+      setState(() {
+        _translation =
+            'Erro na resposta da API: ${response.statusCode} - ${response.body}';
+      });
+    }
+  } catch (e) {
+    setState(() {
+      _translation = 'Erro ao conectar com a API Gemini: $e';
     });
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
+
 
     debugPrint('[DEBUG] Enviando requisição para Gemini...');
     debugPrint('[DEBUG] URL: $url');
