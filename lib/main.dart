@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 late List<CameraDescription> _cameras;
 
@@ -27,6 +28,7 @@ class _TelaInicialState extends State<TelaInicial> {
   String? _translation;
   bool _isLoading = false;
   String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
+  final TextEditingController _textController = TextEditingController();
 
   @override
   void initState() {
@@ -37,10 +39,26 @@ class _TelaInicialState extends State<TelaInicial> {
   @override
   void dispose() {
     _controller.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
-  void initCamera() async {
+  Future<void> initCamera() async {
+    await Permission.camera.request();
+    if (await Permission.camera.isDenied) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Permissão da câmera negada')));
+      return;
+    }
+
+    if (_cameras.isEmpty) {
+      setState(() {
+        _translation = 'Nenhuma câmera disponível no dispositivo.';
+      });
+      return;
+    }
+
     _controller = CameraController(_cameras[0], ResolutionPreset.max);
     await _controller.initialize();
     if (!mounted) return;
@@ -51,37 +69,48 @@ class _TelaInicialState extends State<TelaInicial> {
 
   Future<void> _takePicture() async {
     if (!_controller.value.isInitialized) return;
+
     final directory = await getApplicationDocumentsDirectory();
     final imagesDir = Directory('${directory.path}/images');
     if (!await imagesDir.exists()) {
       await imagesDir.create(recursive: true);
     }
-    final String imagePath = '${imagesDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    final String imagePath =
+        '${imagesDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
     try {
-      await _controller.takePicture().then((XFile file) async {
-        await file.saveTo(imagePath);
-        setState(() {
-          _imagePath = imagePath;
-          _translation = null;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Foto salva em $imagePath')),
-        );
-        await _sendToGemini(imagePath);
+      final file = await _controller.takePicture();
+      await file.saveTo(imagePath);
+      setState(() {
+        _imagePath = imagePath;
+        _translation = null;
+        _textController.clear();
       });
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text('Foto salva em $imagePath')));
+      await _sendToGemini(imagePath);
     } catch (e) {
       print(e);
     }
   }
 
   Future<void> _sendToGemini(String imagePath) async {
+    if (apiKey.isEmpty) {
+      setState(() {
+        _translation = 'Chave de API não encontrada. Verifique o arquivo .env.';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _translation = null;
     });
 
     final url = Uri.parse(
-        'https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent?key=$apiKey');
+      'https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent?key=$apiKey',
+    );
     final bytes = await File(imagePath).readAsBytes();
     final base64Image = base64Encode(bytes);
 
@@ -91,46 +120,36 @@ class _TelaInicialState extends State<TelaInicial> {
           "parts": [
             {
               "text":
-                  "Traduza os hieróglifos egípcios desta imagem para português. Se não houver hieróglifos, responda apenas 'Nenhum hieróglifo encontrado.'"
+                  "Traduza os hieróglifos egípcios desta imagem para português. Se não houver hieróglifos, responda apenas 'Nenhum hieróglifo encontrado.'",
             },
             {
-              "inlineData": {
-                "mimeType": "image/jpeg",
-                "data": base64Image
-              }
-            }
-          ]
-        }
-      ]
+              "inlineData": {"mimeType": "image/jpeg", "data": base64Image},
+            },
+          ],
+        },
+      ],
     });
 
     try {
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: body,
       );
 
-      print('Status: ${response.statusCode}');
-      print('Body: ${response.body}');
+      debugPrint(response.body);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        // Tente extrair o texto de diferentes formas
         String? result;
         try {
           result = data['candidates']?[0]?['content']?['parts']?[0]?['text'];
         } catch (_) {}
-        result ??= data['candidates']?[0]?['content']?['parts']?[0]?.toString();
-        result ??= data['candidates']?[0]?['content']?['parts']?.toString();
-        result ??= data['candidates']?[0]?['content']?.toString();
-        result ??= data['candidates']?[0]?.toString();
         result ??= 'Sem resposta da IA';
 
         setState(() {
           _translation = result;
+          _textController.text = result!;
         });
       } else {
         setState(() {
@@ -153,10 +172,7 @@ class _TelaInicialState extends State<TelaInicial> {
     return Scaffold(
       appBar: AppBar(
         title: Center(
-          child: Image.asset(
-            'images/oraculum_logo.png',
-            height: 48,
-          ),
+          child: Image.asset('images/oraculum_logo.png', height: 48),
         ),
         backgroundColor: Color(0xffBEA073),
         elevation: 2,
@@ -164,12 +180,12 @@ class _TelaInicialState extends State<TelaInicial> {
       body: _isCameraInitialized
           ? Column(
               children: [
-                SizedBox(height: 16), // Espaço entre o título e a câmera
+                SizedBox(height: 16),
                 Expanded(
                   child: Center(
                     child: Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 4), // Borda preta
+                        border: Border.all(color: Colors.black, width: 4),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: AspectRatio(
@@ -196,7 +212,7 @@ class _TelaInicialState extends State<TelaInicial> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
-                      controller: TextEditingController(text: _translation!),
+                      controller: _textController,
                       maxLines: null,
                       readOnly: true,
                       decoration: InputDecoration(
@@ -222,7 +238,6 @@ class _TelaInicialState extends State<TelaInicial> {
               ],
             )
           : Center(child: CircularProgressIndicator()),
-    ); //aaaaaaaaaaaaaaaaaa
+    );
   }
 }
-
