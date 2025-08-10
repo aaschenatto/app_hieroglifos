@@ -7,6 +7,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:convert';
+import './logica.dart';
+
+// Pacote para popup
+import 'package:flutter_popup_card/flutter_popup_card.dart';
 
 late List<CameraDescription> _cameras;
 
@@ -79,8 +83,8 @@ class _TelaInicialState extends State<TelaInicial> {
       });
     }
   }
-
-  Future<void> _takePicture() async {
+  
+  Future _takePicture() async {
     if (!_controller.value.isInitialized) return;
 
     final directory = await getApplicationDocumentsDirectory();
@@ -99,15 +103,16 @@ class _TelaInicialState extends State<TelaInicial> {
         _translation = null;
         _textController.clear();
       });
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text('Foto salva em $imagePath')));
-      await _sendToGemini(imagePath);
+
+      return await enviarparagemini(imagePath);
+
+       
     } catch (e) {
       print(e);
     }
+    
   }
-
+/*
   Future<void> _sendToGemini(String imagePath) async {
     if (apiKey.isEmpty) {
       setState(() {
@@ -188,7 +193,7 @@ class _TelaInicialState extends State<TelaInicial> {
         _isLoading = false;
       });
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -259,7 +264,35 @@ class _TelaInicialState extends State<TelaInicial> {
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
-                          onPressed: _isLoading ? null : _takePicture,
+                          onPressed: () async {
+  if (_isLoading) return;
+
+  setState(() {
+    _isLoading = true;
+  });
+
+  try {
+    // Chama _takePicture() e envia para o Gemini
+
+    final result = await _takePicture();
+
+    if (!mounted) return;
+
+    showPopupCard(
+      context: context,
+      builder: (context) {
+        return PopupCard(child: Padding(padding: EdgeInsetsGeometry.all(15), child: SizedBox(height: 360, width: 210, child: Column(children: [Text("Resultado da Verificação:", style: TextStyle(fontWeight: FontWeight.bold),), Text(result ?? 'Sem resposta')]))));
+      },
+    );
+  } catch (e) {
+    print('Erro: $e');
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+},
+                          
                           icon: Icon(Icons.camera_enhance_rounded),
                         ),
                       ),

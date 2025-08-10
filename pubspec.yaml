@@ -40,6 +40,8 @@ dependencies:
   flutter_dotenv: ^5.2.1
   permission_handler: ^11.3.0
   image_picker: ^1.1.2
+  google_generative_ai: ^0.2.2
+  flutter_popup_card:
 
 
 dev_dependencies:
@@ -68,6 +70,9 @@ flutter:
   assets:
     - .env
     - assets/images/oraculum_logo.png
+    - assets/images/imagem.jpeg
+    - assets/images/hieroglifo.jpeg
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
