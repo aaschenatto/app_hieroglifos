@@ -104,7 +104,7 @@ class _TelaInicialState extends State<TelaInicial> {
         _textController.clear();
       });
 
-      return await enviarparagemini(imagePath);
+      return await enviarparagemini(imagePath,);
 
        
     } catch (e) {

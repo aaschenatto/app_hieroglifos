@@ -4,7 +4,7 @@ import 'dart:io';
 
 
 Future<String?> enviarparagemini(path) async {
-  final apiKey = 'AIzaSyA87QHo675Zkp8Qas5tstnCVEKtywPJxiA'; // Substitua pela sua chave real
+  final apiKey = 
   final model = GenerativeModel(
     model: 'gemini-2.5-flash',
     apiKey: apiKey,
