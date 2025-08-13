@@ -32,7 +32,12 @@ Durante séculos, manuscritos antigos permaneceram como enigmas para a maioria d
 --- 
 
 ## 📦 Instalação
-
-1. Clone o repositório do app:
+1. Clone o repositório do app usando o git clone
 ```bash
-git clone blablabal
+git clone
+````
+2. Instale todas os pacotes necessários com flutter pub get
+```bash
+flutter pub get
+````
+3. Conecte o dispositivo mobile desejado, ative a depuração USB e instale o app
