@@ -30,7 +30,42 @@ Durante séculos, manuscritos antigos permaneceram como enigmas para a maioria d
 - Câmera do dispositivo (captura da imagem)
 
 --- 
+## ⚙️ API Gemini
 
+A API utilizada no app é a API do gemini, que é usada para realizar a análise de imagens dos hieróglifos e retornar para o usuário um texto
+com os simbolos traduzidos. Se não for possível descobrir a tradução exata, o contexto das inscrições será retornado.
+
+````bash
+Future<String?> enviarparagemini(path) async {
+  final apiKey = 'Insira sua chave api' ;
+  final model = GenerativeModel(
+    model: 'gemini-2.5-flash',
+    apiKey: apiKey,
+  );
+  
+  // Carrega a imagem dos assets corretamente
+
+  final file = File(path);
+  final imageBytes = await file.readAsBytes();
+
+  print("bytes"+imageBytes.toString());
+
+  // Cria o conteúdo da requisição
+  final content = Content.multi([
+    DataPart('image/jpeg', imageBytes),
+    TextPart('Prompt'),
+  ]);
+
+  // Mandar para o modelo
+  final response = await model.generateContent([content]);
+
+  // Mostra a resposta
+  print(response.text);
+  return response.text;
+}
+````
+Vale ressaltar que a imagem prescisa passar por tratamento para ser lida corretamente pela API.
+---
 ## 📦 Instalação
 1. Clone o repositório do app usando o git clone
 ```bash
@@ -40,4 +75,6 @@ git clone https://github.com/aaschenatto/app_hieroglifos.git
 ```bash
 flutter pub get
 ````
-3. Conecte o dispositivo mobile desejado, ative a depuração USB e instale o app
+3. Insira a sua própria chave da Gemini API no arquivo logica.dart
+
+4. Conecte o dispositivo mobile desejado, ative a depuração USB e instale o app
