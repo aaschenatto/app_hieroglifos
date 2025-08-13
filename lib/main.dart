@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'dart:convert';
 import './logica.dart';
 import 'package:flutter/services.dart';
 
@@ -18,7 +16,6 @@ late List<CameraDescription> _cameras;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  await dotenv.load(fileName: ".env");
   _cameras = await availableCameras();
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: TelaInicial()));
 }
@@ -34,7 +31,6 @@ class _TelaInicialState extends State<TelaInicial> {
   String? _imagePath;
   String? _translation;
   bool _isLoading = false;
-  String apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
   final TextEditingController _textController = TextEditingController();
   File? _image;
 
@@ -180,8 +176,8 @@ class _TelaInicialState extends State<TelaInicial> {
                       width: 250.0,
                       height: 300.0,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 4), // Borda preta
-                        borderRadius: BorderRadius.circular(20), // Opcional: cantos arredondados
+                        border: Border.all(color: Colors.black, width: 4), 
+                        borderRadius: BorderRadius.circular(20), 
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
