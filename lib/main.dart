@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'dart:convert';
 import './logica.dart';
+import 'package:flutter/services.dart';
 
 // Pacote para popup
 import 'package:flutter_popup_card/flutter_popup_card.dart';
@@ -16,6 +17,7 @@ late List<CameraDescription> _cameras;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   await dotenv.load(fileName: ".env");
   _cameras = await availableCameras();
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: TelaInicial()));
@@ -76,14 +78,44 @@ class _TelaInicialState extends State<TelaInicial> {
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    
 
     if (pickedFile != null) {
       setState(() {
         _image = File(pickedFile.path);
       });
     }
+
+    final result = await enviarparagemini(_image?.path);
+
+    showPopupCard(
+      context: context,
+        builder: (context) {
+          return PopupCard(
+            child: Padding(
+              padding: EdgeInsetsGeometry.all(15),
+              child: SizedBox(
+                height: 360,
+                width: 210,
+                child: Column(
+                  children: [
+                    Text(
+                      "Resultado da Verificação:",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold, 
+                      ),
+                    ),
+                    Text(result ?? 'Sem resposta'),  //fazer o card no outro botao so dando o result como a foto escolhida
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    
   }
-  
+
   Future _takePicture() async {
     if (!_controller.value.isInitialized) return;
 
@@ -104,96 +136,11 @@ class _TelaInicialState extends State<TelaInicial> {
         _textController.clear();
       });
 
-      return await enviarparagemini(imagePath,);
-
-       
+      return await enviarparagemini(imagePath);
     } catch (e) {
       print(e);
     }
-    
   }
-/*
-  Future<void> _sendToGemini(String imagePath) async {
-    if (apiKey.isEmpty) {
-      setState(() {
-        _translation = 'Chave de API não encontrada. Verifique o arquivo .env.';
-      });
-      debugPrint('[DEBUG] API Key vazia');
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _translation = null;
-    });
-
-    final url = Uri.parse(
-      'https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent?key=$apiKey',
-    );
-    final bytes = await File(imagePath).readAsBytes();
-    final base64Image = base64Encode(bytes);
-
-    final body = jsonEncode({
-      "contents": [
-        {
-          "parts": [
-            {
-              "text":
-                  "Traduza os hieróglifos egípcios desta imagem para português. Se não houver hieróglifos, responda apenas 'Nenhum hieróglifo encontrado.'",
-            },
-            {
-              "inlineData": {"mimeType": "image/jpeg", "data": base64Image},
-            },
-          ],
-        },
-      ],
-    });
-
-    debugPrint('[DEBUG] Enviando requisição para Gemini...');
-    debugPrint('[DEBUG] URL: $url');
-    debugPrint('[DEBUG] Tamanho da imagem base64: ${base64Image.length}');
-    debugPrint('[DEBUG] Corpo da requisição:\n$body');
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: body,
-      );
-
-      debugPrint('[DEBUG] Status da resposta: ${response.statusCode}');
-      debugPrint('[DEBUG] Corpo da resposta:\n${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        String? result;
-        try {
-          result = data['candidates']?[0]?['content']?['parts']?[0]?['text'];
-        } catch (e) {
-          debugPrint('[DEBUG] Erro ao extrair resultado da resposta: $e');
-        }
-        result ??= 'Sem resposta da IA';
-
-        setState(() {
-          _translation = result;
-          _textController.text = result!;
-        });
-      } else {
-        setState(() {
-          _translation = 'Erro na tradução: ${response.statusCode}';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _translation = 'Erro ao conectar à API Gemini: $e';
-      });
-      debugPrint('[DEBUG] Exceção na requisição: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -208,16 +155,16 @@ class _TelaInicialState extends State<TelaInicial> {
       body: _isCameraInitialized
           ? Column(
               children: [
-                SizedBox(height: 16),
+                SizedBox(height: 10),
                 Expanded(
                   child: Center(
                     child: Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 4),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: AspectRatio(
-                        aspectRatio: 1,
+                        aspectRatio: 0.8,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: CameraPreview(_controller),
@@ -229,7 +176,23 @@ class _TelaInicialState extends State<TelaInicial> {
                 if (_imagePath != null)
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Image.file(File(_imagePath!)),
+                    child: Container(
+                      width: 250.0,
+                      height: 300.0,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 4), // Borda preta
+                        borderRadius: BorderRadius.circular(20), // Opcional: cantos arredondados
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.file(
+                          File(_imagePath!),
+                          width: 300.0,
+                          height: 300.0,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
                   ),
                 if (_isLoading)
                   Padding(
@@ -265,34 +228,53 @@ class _TelaInicialState extends State<TelaInicial> {
                         ),
                         child: IconButton(
                           onPressed: () async {
-  if (_isLoading) return;
+                            if (_isLoading) return;
 
-  setState(() {
-    _isLoading = true;
-  });
+                            setState(() {
+                              _isLoading = true;
+                            });
 
-  try {
-    // Chama _takePicture() e envia para o Gemini
+                            try {
+                              // Chama _takePicture() e envia para o Gemini
 
-    final result = await _takePicture();
+                              final result = await _takePicture();
 
-    if (!mounted) return;
+                              if (!mounted) return;
 
-    showPopupCard(
-      context: context,
-      builder: (context) {
-        return PopupCard(child: Padding(padding: EdgeInsetsGeometry.all(15), child: SizedBox(height: 360, width: 210, child: Column(children: [Text("Resultado da Verificação:", style: TextStyle(fontWeight: FontWeight.bold),), Text(result ?? 'Sem resposta')]))));
-      },
-    );
-  } catch (e) {
-    print('Erro: $e');
-  } finally {
-    setState(() {
-      _isLoading = false;
-    });
-  }
-},
-                          
+                              showPopupCard(
+                                context: context,
+                                builder: (context) {
+                                  return PopupCard(
+                                    child: Padding(
+                                      padding: EdgeInsetsGeometry.all(15),
+                                      child: SizedBox(
+                                        height: 360,
+                                        width: 210,
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              "Resultado da Verificação:",
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold, 
+                                              ),
+                                            ),
+                                            Text(result ?? 'Sem resposta'),  //fazer o card no outro botao so dando o result como a foto escolhida
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            } catch (e) {
+                              print('Erro: $e');
+                            } finally {
+                              setState(() {
+                                _isLoading = false;
+                              });
+                            }
+                          },
+
                           icon: Icon(Icons.camera_enhance_rounded),
                         ),
                       ),
@@ -311,6 +293,10 @@ class _TelaInicialState extends State<TelaInicial> {
                           icon: Icon(Icons.photo_library_rounded),
                         ),
                       ),
+                      SizedBox(
+                        width: 0,
+                        height: 100,
+                      )
                     ],
                   ),
                 ),

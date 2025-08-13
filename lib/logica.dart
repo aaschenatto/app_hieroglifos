@@ -4,14 +4,11 @@ import 'dart:io';
 
 
 Future<String?> enviarparagemini(path) async {
-  final apiKey = 
+  final apiKey = 'AIzaSyA87QHo675Zkp8Qas5tstnCVEKtywPJxiA'; 
   final model = GenerativeModel(
     model: 'gemini-2.5-flash',
     apiKey: apiKey,
   );
-
-  print("ele denovo:" + path);
-
   
 
   // Carrega a imagem dos assets corretamente
