@@ -34,7 +34,7 @@ Durante séculos, manuscritos antigos permaneceram como enigmas para a maioria d
 ## 📦 Instalação
 1. Clone o repositório do app usando o git clone
 ```bash
-git clone
+git clone https://github.com/aaschenatto/app_hieroglifos.git
 ````
 2. Instale todas os pacotes necessários com flutter pub get
 ```bash
