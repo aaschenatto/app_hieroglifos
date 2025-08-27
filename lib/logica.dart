@@ -5,7 +5,7 @@ import 'dart:io';
 String prompt = '';
 
 Future<String?> enviarparagemini(path) async {
-  final apiKey = 'AIzaSyDEm2OkdSbS-YPu_PkOt6PnT73PBTL-NWA';
+  final apiKey = 'Insira sua chave api';
   final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
 
   // Carrega a imagem dos assets corretamente
