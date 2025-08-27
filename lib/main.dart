@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:path_provider/path_provider.dart';
-
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import './logica.dart';
 import 'package:flutter/services.dart';
-
 // Pacote para popup
 import 'package:flutter_popup_card/flutter_popup_card.dart';
 
 late List<CameraDescription> _cameras;
+
+  int idioma = 1;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,9 +27,9 @@ class TelaInicial extends StatefulWidget {
 
 class _TelaInicialState extends State<TelaInicial> {
   late CameraController _controller;
+
   bool _isCameraInitialized = false;
   String? _imagePath;
-  String? _translation;
   bool _isLoading = false;
   final TextEditingController _textController = TextEditingController();
   File? _image;
@@ -58,7 +58,29 @@ class _TelaInicialState extends State<TelaInicial> {
 
     if (_cameras.isEmpty) {
       setState(() {
-        _translation = 'Nenhuma câmera disponível no dispositivo.';
+        showPopupCard(
+          context: context,
+          builder: (context) {
+            return PopupCard(
+              child: Padding(
+                padding: EdgeInsetsGeometry.all(15),
+                child: SizedBox(
+                  height: 360,
+                  width: 210,
+                  child: Column(
+                    children: [
+                      Text(
+                        "Resultado da Verificação:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Text("nenhuma camera disponivel"),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
       });
       return;
     }
@@ -72,9 +94,14 @@ class _TelaInicialState extends State<TelaInicial> {
   }
 
   Future<void> _pickImage() async {
+    if (_isLoading) return; // Evita múltiplos carregamentos
+
+    setState(() {
+      _isLoading = true;
+    });
+
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    
 
     if (pickedFile != null) {
       setState(() {
@@ -84,35 +111,37 @@ class _TelaInicialState extends State<TelaInicial> {
 
     final result = await enviarparagemini(_image?.path);
 
+    setState(() {
+      _isLoading = false;
+    });
+
     showPopupCard(
       context: context,
-        builder: (context) {
-          return PopupCard(
-            child: Padding(
-              padding: EdgeInsetsGeometry.all(15),
-              child: SizedBox(
-                height: 360,
-                width: 210,
-                child: Column(
-                  children: [
-                    Text(
-                      "Resultado da Verificação:",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold, 
-                      ),
-                    ),
-                    Text(result ?? 'Sem resposta'),  //fazer o card no outro botao so dando o result como a foto escolhida
-                  ],
-                ),
+      builder: (context) {
+        return PopupCard(
+          child: Padding(
+            padding: EdgeInsetsGeometry.all(15),
+            child: SizedBox(
+              height: 360,
+              width: 210,
+              child: Column(
+                children: [
+                  Text(
+                    "Resultado da Verificação:",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(result ?? 'Sem resposta'),
+                ],
               ),
             ),
-          );
-        },
-      );
-    
+          ),
+        );
+      },
+    );
   }
 
   Future _takePicture() async {
+    //faz a foto salva ela e manda pro gemini
     if (!_controller.value.isInitialized) return;
 
     final directory = await getApplicationDocumentsDirectory();
@@ -122,17 +151,17 @@ class _TelaInicialState extends State<TelaInicial> {
     }
 
     final String imagePath =
-        '${imagesDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        '${imagesDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg'; //gera nome unico p imagem
     try {
       final file = await _controller.takePicture();
       await file.saveTo(imagePath);
       setState(() {
+        //salva dados da imagem
         _imagePath = imagePath;
-        _translation = null;
         _textController.clear();
       });
 
-      return await enviarparagemini(imagePath);
+      return await enviarparagemini(imagePath); //manda para gemini
     } catch (e) {
       print(e);
     }
@@ -176,8 +205,8 @@ class _TelaInicialState extends State<TelaInicial> {
                       width: 250.0,
                       height: 300.0,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 4), 
-                        borderRadius: BorderRadius.circular(20), 
+                        border: Border.all(color: Colors.black, width: 4),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(16),
@@ -195,19 +224,19 @@ class _TelaInicialState extends State<TelaInicial> {
                     padding: const EdgeInsets.all(8.0),
                     child: CircularProgressIndicator(),
                   ),
-                if (_translation != null)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TextField(
-                      controller: _textController,
-                      maxLines: null,
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: 'Tradução dos Hieróglifos',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
+                DropdownMenu<int>(
+          initialSelection: idioma, // valor inicial selecionado
+          onSelected: (int? value) {
+            setState(() {
+              idioma = value ?? 1; // se for null, mantém 1
+            });
+          },
+          dropdownMenuEntries: const <DropdownMenuEntry<int>>[
+            DropdownMenuEntry(value: 1, label: "Português"),
+            DropdownMenuEntry(value: 2, label: "Español"),
+            DropdownMenuEntry(value: 3, label: "English"),
+          ],
+        ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
@@ -251,10 +280,12 @@ class _TelaInicialState extends State<TelaInicial> {
                                             Text(
                                               "Resultado da Verificação:",
                                               style: TextStyle(
-                                                fontWeight: FontWeight.bold, 
+                                                fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            Text(result ?? 'Sem resposta'),  //fazer o card no outro botao so dando o result como a foto escolhida
+                                            Text(
+                                              result ?? 'Sem resposta',
+                                            ), //fazer o card no outro botao so dando o result como a foto escolhida
                                           ],
                                         ),
                                       ),
@@ -289,10 +320,7 @@ class _TelaInicialState extends State<TelaInicial> {
                           icon: Icon(Icons.photo_library_rounded),
                         ),
                       ),
-                      SizedBox(
-                        width: 0,
-                        height: 100,
-                      )
+                      SizedBox(width: 0, height: 100),
                     ],
                   ),
                 ),
