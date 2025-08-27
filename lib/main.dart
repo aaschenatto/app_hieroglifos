@@ -11,7 +11,7 @@ import 'package:flutter_popup_card/flutter_popup_card.dart';
 
 late List<CameraDescription> _cameras;
 
-  int idioma = 1;
+int idioma = 1;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -225,18 +225,18 @@ class _TelaInicialState extends State<TelaInicial> {
                     child: CircularProgressIndicator(),
                   ),
                 DropdownMenu<int>(
-          initialSelection: idioma, // valor inicial selecionado
-          onSelected: (int? value) {
-            setState(() {
-              idioma = value ?? 1; // se for null, mantém 1
-            });
-          },
-          dropdownMenuEntries: const <DropdownMenuEntry<int>>[
-            DropdownMenuEntry(value: 1, label: "Português"),
-            DropdownMenuEntry(value: 2, label: "Español"),
-            DropdownMenuEntry(value: 3, label: "English"),
-          ],
-        ),
+                  initialSelection: idioma, // valor inicial selecionado
+                  onSelected: (int? value) {
+                    setState(() {
+                      idioma = value ?? 1; // se for null, mantém 1
+                    });
+                  },
+                  dropdownMenuEntries: const <DropdownMenuEntry<int>>[
+                    DropdownMenuEntry(value: 1, label: "Português"),
+                    DropdownMenuEntry(value: 2, label: "Español"),
+                    DropdownMenuEntry(value: 3, label: "English"),
+                  ],
+                ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Row(
