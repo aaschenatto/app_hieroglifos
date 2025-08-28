@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter_application_3/historico.dart';
+import 'package:flutter_application_3/model/history_model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import './logica.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 // Pacote para popup
 import 'package:flutter_popup_card/flutter_popup_card.dart';
 
@@ -17,6 +20,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   _cameras = await availableCameras();
+  await dotenv.load(fileName: ".env");
   runApp(MaterialApp(debugShowCheckedModeBanner: false, home: TelaInicial()));
 }
 
@@ -242,6 +246,30 @@ class _TelaInicialState extends State<TelaInicial> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Color(0xffBEA073),
+                            width: 2.0,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          onPressed: _isLoading
+                              ? null
+                              : () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => InicialHistory(),
+                                    ),
+                                  );
+                                },
+                          icon: Icon(Icons.history_edu),
+                        ),
+                      ),
+                      SizedBox(width: 24),
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,

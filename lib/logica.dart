@@ -1,11 +1,19 @@
+import 'package:flutter_application_3/dao/history_dao.dart';
+import 'package:flutter_application_3/model/history_model.dart';
+
 import './main.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'dart:io';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+final dao = HistoryDao();
 
 String prompt = '';
 
+String api_key = dotenv.env['api_key']!;
+
 Future<String?> enviarparagemini(path) async {
-  final apiKey = 'Insira sua chave api';
+  final apiKey = '$api_key'; // Substitua pela sua chave de API
   final model = GenerativeModel(model: 'gemini-2.5-flash', apiKey: apiKey);
 
   // Carrega a imagem dos assets corretamente
@@ -36,6 +44,8 @@ Future<String?> enviarparagemini(path) async {
 
   // Mandar para o modelo
   final response = await model.generateContent([content]);
+
+  dao.postarHistory(response.text!);
 
   // Mostra a resposta
   print(response.text);
