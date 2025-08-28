@@ -9,6 +9,7 @@ import 'dart:io';
 import './logica.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 // Pacote para popup
 import 'package:flutter_popup_card/flutter_popup_card.dart';
 
@@ -31,6 +32,8 @@ class TelaInicial extends StatefulWidget {
 
 class _TelaInicialState extends State<TelaInicial> {
   late CameraController _controller;
+
+  XFile? savedImage;
 
   bool _isCameraInitialized = false;
   String? _imagePath;
@@ -158,7 +161,9 @@ class _TelaInicialState extends State<TelaInicial> {
         '${imagesDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg'; //gera nome unico p imagem
     try {
       final file = await _controller.takePicture();
+
       await file.saveTo(imagePath);
+
       setState(() {
         //salva dados da imagem
         _imagePath = imagePath;

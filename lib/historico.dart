@@ -83,7 +83,10 @@ class _InicialHistoryState extends State<InicialHistory> {
                               size: 50,
                               color: Colors.grey,
                             ),
-                        title: Text(history.texto),
+                        title: Text(
+                          history.texto,
+                          style: TextStyle(color: Colors.white),
+                        ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete, color: Colors.white),
                           onPressed: () async {
