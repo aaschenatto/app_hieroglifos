@@ -36,4 +36,12 @@ Durante séculos, manuscritos antigos permaneceram como enigmas para a maioria d
 
 1. Clone o repositório do app:
 ```bash
-git clone blablabal
+git clone https://github.com/aaschenatto/app_hieroglifos
+````
+2. Já dentro da pasta do projeto, execute o seguinte comando para instalar as dependências:
+ ```bash
+flutter pub get
+````
+3. Crie uma conta no gemini API e insira a sua chave API no arquivo logica.dart
+4. Em seguida, ative a depuração USB em seu dispositivo móvel e conecte o mesmo a uma entrada USB de seu computador
+5. Selecione seu celular na lista de dispositivos e clique para rodar o app
