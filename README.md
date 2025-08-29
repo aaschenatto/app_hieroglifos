@@ -65,10 +65,10 @@ flutter pub get
 ```
 
 3. **Configure sua chave de API
-Abra o arquivo ```lib/logica.dart``` e insira sua chave:
+Abra o arquivo ```.env-exemple``` e insira sua chave:
 ```dart
-// Dentro de lib/logica.dart
-const String apiKey = 'SUA_CHAVE_API_AQUI';
+// Dentro de .env-exemple
+SUA-CHAVE-API=;
 ```
 4. **Execute o aplicativo**
 
