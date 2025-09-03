@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_3/dao/history_dao.dart';
+import 'package:flutter_application_3/database/dao/history_dao.dart';
 import 'package:flutter_application_3/model/history_model.dart';
 
 class InicialHistory extends StatefulWidget {
@@ -69,20 +69,19 @@ class _InicialHistoryState extends State<InicialHistory> {
                       ),
                       child: ListTile(
                         leading:
-                            // (history.imagePath.isNotEmpty &&
-                            //     File(history.imagePath).existsSync())
-                            // ? Image.file(
-                            //     File(history.imagePath),
-                            //     width: 50,
-                            //     height: 50,
-                            //     fit: BoxFit.cover,
-                            //   )
-                            // :
-                            const Icon(
-                              Icons.image_not_supported_outlined,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
+                            (history.imagePath!.isNotEmpty &&
+                                File(history.imagePath!).existsSync())
+                            ? Image.file(
+                                File(history.imagePath!),
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              )
+                            : const Icon(
+                                Icons.image_not_supported_outlined,
+                                size: 50,
+                                color: Colors.grey,
+                              ),
                         title: Text(
                           history.texto,
                           style: TextStyle(color: Colors.white),
@@ -110,14 +109,14 @@ class _InicialHistoryState extends State<InicialHistory> {
                                     style: const TextStyle(fontSize: 16),
                                   ),
                                   const SizedBox(height: 10),
-                                  // if (history.imagePath.isNotEmpty &&
-                                  //     File(history.imagePath).existsSync())
-                                  //   Image.file(
-                                  //     File(history.imagePath),
-                                  //     height: 150,
-                                  //     width: double.infinity,
-                                  //     fit: BoxFit.cover,
-                                  //   ),
+                                  //   if (history.imagePath!.isNotEmpty &&
+                                  //       File(history.imagePath!).existsSync())
+                                  //     Image.file(
+                                  //       File(history.imagePath!),
+                                  //       height: 150,
+                                  //       width: double.infinity,
+                                  //       fit: BoxFit.cover,
+                                  //     ),
                                 ],
                               ),
                               actions: [

@@ -1,4 +1,4 @@
-import 'package:flutter_application_3/dao/history_dao.dart';
+import 'package:flutter_application_3/database/dao/history_dao.dart';
 import 'package:flutter_application_3/model/history_model.dart';
 
 import './main.dart';
@@ -44,8 +44,6 @@ Future<String?> enviarparagemini(path) async {
 
   // Mandar para o modelo
   final response = await model.generateContent([content]);
-
-  dao.postarHistory(response.text!);
 
   // Mostra a resposta
   print(response.text);

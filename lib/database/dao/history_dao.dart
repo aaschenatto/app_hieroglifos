@@ -1,7 +1,7 @@
 import 'package:http/http.dart';
 import 'package:sqflite/sqflite.dart';
-import '../database/database.dart';
-import '../model/history_model.dart';
+import '../database.dart';
+import '../../model/history_model.dart';
 
 class HistoryDao {
   Future<History> inserir(History history) async {
@@ -30,10 +30,10 @@ class HistoryDao {
     return await db.delete('history', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<void> postarHistory(String texto) async {
+  Future<void> postarHistory(String texto, String imagePath) async {
     final dao = HistoryDao();
 
-    final novo = History(texto: texto);
+    final novo = History(texto: texto, imagePath: null);
 
     await dao.inserir(novo);
     print("Histórico salvo localmente: ${novo.texto}");

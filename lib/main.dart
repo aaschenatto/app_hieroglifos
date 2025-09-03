@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter_application_3/database/dao/history_dao.dart';
 import 'package:flutter_application_3/historico.dart';
 import 'package:flutter_application_3/model/history_model.dart';
 import 'package:path_provider/path_provider.dart';
@@ -164,6 +165,8 @@ class _TelaInicialState extends State<TelaInicial> {
 
       await file.saveTo(imagePath);
 
+      print("Caminho da imagem: $imagePath");
+
       setState(() {
         //salva dados da imagem
         _imagePath = imagePath;
@@ -174,6 +177,16 @@ class _TelaInicialState extends State<TelaInicial> {
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<String> postarHistory(String texto, String imagePath) async {
+    final dao = HistoryDao();
+
+    final novo = History(texto: texto, imagePath: imagePath);
+
+    await dao.inserir(novo);
+    print("Histórico salvo localmente: ${novo.texto}");
+    return "Histórico salvo localmente: ${novo.texto}";
   }
 
   @override
@@ -297,6 +310,8 @@ class _TelaInicialState extends State<TelaInicial> {
 
                               final result = await _takePicture();
 
+                              await postarHistory(result, _imagePath!);
+
                               if (!mounted) return;
 
                               showPopupCard(
@@ -316,9 +331,8 @@ class _TelaInicialState extends State<TelaInicial> {
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            Text(
-                                              result ?? 'Sem resposta',
-                                            ), //fazer o card no outro botao so dando o result como a foto escolhida
+                                            Text(result ?? 'Sem resposta'),
+                                            //fazer o card no outro botao so dando o result como a foto escolhida
                                           ],
                                         ),
                                       ),
@@ -326,6 +340,9 @@ class _TelaInicialState extends State<TelaInicial> {
                                   );
                                 },
                               );
+                              if (result != null && _image?.path != null) {
+                                await postarHistory(result, _image!.path);
+                              }
                             } catch (e) {
                               print('Erro: $e');
                             } finally {
