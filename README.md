@@ -20,8 +20,18 @@ Durante séculos, manuscritos antigos permaneceram como enigmas. Com o Oraculum,
 Nosso **objetivo** é transformar imagens de documentos antigos em texto legível e traduzido para **Português, Inglês e Espanhol**, usando uma IA treinada para interpretação **paleográfica e linguística**.
 
 <div align="center">
-  <img src="https://placehold.co/250x500/1e1e1e/c0c0c0?text=UI+Screenshot+1" alt="Screenshot da UI do App"/>
-  <img src="https://placehold.co/250x500/1e1e1e/c0c0c0?text=UI+Screenshot+2" alt="Screenshot da UI do App"/>
+  <table>
+    <tr>
+      <td align="center">
+        <p>Free</p>
+        <img src="https://github.com/aaschenatto/app_hieroglifos/blob/main/assets/images/FreeAppInicialPage.jpg" width="350"/>
+      </td>
+      <td align="center">
+        <p>Premium</p>
+        <img src="https://github.com/aaschenatto/app_hieroglifos/blob/main/assets/images/PremiumAppInicialPage.jpg" width="350"/>
+      </td>
+    </tr>
+  </table>
 </div>
 
 ---
