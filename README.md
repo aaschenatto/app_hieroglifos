@@ -1,6 +1,5 @@
 <div align="center">
-  <img src="https://placehold.co/600x300/2a2a2a/c0c0c0?text=ORACULUM" alt="Logo do Oraculum" width="250"/>
-  <h1># 📜 ORACULUM</h1>
+  <img src="https://github.com/aaschenatto/app_hieroglifos/blob/main/assets/images/OraculumLogoPremiumApp.png" alt="Logo do Oraculum" width="500"/>
   <p><strong>Dando voz ao passado com Inteligência Artificial.</strong></p>
   <p>Traduza papiros e textos antigos a partir de uma simples foto.</p>
   <p>
