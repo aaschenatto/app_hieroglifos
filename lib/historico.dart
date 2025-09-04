@@ -109,7 +109,7 @@ class _InicialHistoryState extends State<InicialHistory> {
                                       borderRadius: BorderRadius.circular(12),
                                       child: Image.file(
                                         File(history.imagePath!),
-                                        height: 250,
+                                        height: 200,
                                         fit: BoxFit.cover,
                                       ),
                                     ),
