@@ -126,6 +126,10 @@ class _TelaInicialState extends State<TelaInicial> {
       _isLoading = false;
     });
 
+    if (result != null && _image?.path != null) {
+      await postarHistory(result, _image!.path);
+    }
+
     showPopupCard(
       context: context,
       builder: (context) {
@@ -410,8 +414,9 @@ class _TelaInicialState extends State<TelaInicial> {
                       CustomIconButton(
                         icon: Icons.photo_library_rounded,
                         label: "Galeria",
-                        onPressed: () {
+                        onPressed: () async {
                           _isLoading ? null : _pickImage();
+                          // colocar o post pro histórico
                         },
                       ),
                     ],

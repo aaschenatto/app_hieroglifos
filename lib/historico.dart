@@ -102,18 +102,17 @@ class _InicialHistoryState extends State<InicialHistory> {
                                     style: const TextStyle(fontSize: 16),
                                   ),
                                   const SizedBox(height: 12),
-                                  // if (history.imagePath != null &&
-                                  //     history.imagePath!.isNotEmpty &&
-                                  //     File(history.imagePath!).existsSync())
-                                  //   ClipRRect(
-                                  //     borderRadius: BorderRadius.circular(12),
-                                  //     child: Image.file(
-                                  //       File(history.imagePath!),
-                                  //       height: 150,
-                                  //       width: double.infinity,
-                                  //       fit: BoxFit.cover,
-                                  //     ),
-                                  //   ),
+                                  if (history.imagePath != null &&
+                                      history.imagePath!.isNotEmpty &&
+                                      File(history.imagePath!).existsSync())
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Image.file(
+                                        File(history.imagePath!),
+                                        height: 250,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
                                 ],
                               ),
                               actions: [
