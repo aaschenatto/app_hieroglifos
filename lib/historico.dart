@@ -16,9 +16,20 @@ class _InicialHistoryState extends State<InicialHistory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffF7F4EF),
       appBar: AppBar(
         backgroundColor: const Color(0xffBEA073),
-        title: const Text("Histórico"),
+        elevation: 4,
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white, size: 32),
+        title: const Text(
+          "Histórico",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
+        ),
       ),
       body: FutureBuilder<List<History>>(
         future: dao.buscarTodos(),
@@ -45,78 +56,64 @@ class _InicialHistoryState extends State<InicialHistory> {
                     children: [
                       Icon(Icons.history, size: 100, color: Colors.grey[400]),
                       const SizedBox(height: 16),
-                      const Text("Nenhum histórico encontrado"),
+                      const Text(
+                        "Nenhum histórico encontrado",
+                        style: TextStyle(fontSize: 16, color: Colors.black54),
+                      ),
                     ],
                   ),
                 );
               }
 
               return ListView.builder(
+                padding: const EdgeInsets.all(12),
                 itemCount: historicos.length,
                 itemBuilder: (context, index) {
                   final history = historicos[index];
 
                   return Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
                     child: Card(
-                      color: const Color.fromARGB(171, 190, 160, 115),
-                      elevation: 4,
+                      elevation: 6,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      child: ListTile(
-                        leading:
-                            (history.imagePath!.isNotEmpty &&
-                                File(history.imagePath!).existsSync())
-                            ? Image.file(
-                                File(history.imagePath!),
-                                width: 50,
-                                height: 50,
-                                fit: BoxFit.cover,
-                              )
-                            : const Icon(
-                                Icons.image_not_supported_outlined,
-                                size: 50,
-                                color: Colors.grey,
-                              ),
-                        title: Text(
-                          history.texto,
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.white),
-                          onPressed: () async {
-                            if (history.id != null) {
-                              await dao.deletar(history.id!);
-                              setState(() {});
-                            }
-                          },
-                        ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
                         onTap: () {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Detalhes do Histórico'),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              title: const Text(
+                                'Detalhes do Histórico',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xffBEA073),
+                                ),
+                              ),
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Texto: ${history.texto}",
+                                    history.texto,
                                     style: const TextStyle(fontSize: 16),
                                   ),
-                                  const SizedBox(height: 10),
-                                  //   if (history.imagePath!.isNotEmpty &&
-                                  //       File(history.imagePath!).existsSync())
-                                  //     Image.file(
+                                  const SizedBox(height: 12),
+                                  // if (history.imagePath != null &&
+                                  //     history.imagePath!.isNotEmpty &&
+                                  //     File(history.imagePath!).existsSync())
+                                  //   ClipRRect(
+                                  //     borderRadius: BorderRadius.circular(12),
+                                  //     child: Image.file(
                                   //       File(history.imagePath!),
                                   //       height: 150,
                                   //       width: double.infinity,
                                   //       fit: BoxFit.cover,
                                   //     ),
+                                  //   ),
                                 ],
                               ),
                               actions: [
@@ -124,13 +121,60 @@ class _InicialHistoryState extends State<InicialHistory> {
                                   onPressed: () => Navigator.pop(context),
                                   child: const Text(
                                     'Fechar',
-                                    style: TextStyle(color: Colors.red),
+                                    style: TextStyle(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           );
                         },
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(12),
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child:
+                                (history.imagePath != null &&
+                                    history.imagePath!.isNotEmpty &&
+                                    File(history.imagePath!).existsSync())
+                                ? Image.file(
+                                    File(history.imagePath!),
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Container(
+                                    width: 60,
+                                    height: 60,
+                                    color: Colors.grey[300],
+                                    child: const Icon(
+                                      Icons.image_not_supported_outlined,
+                                      size: 30,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                          ),
+                          title: Text(
+                            history.texto,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15,
+                            ),
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              if (history.id != null) {
+                                await dao.deletar(history.id!);
+                                setState(() {});
+                              }
+                            },
+                          ),
+                        ),
                       ),
                     ),
                   );

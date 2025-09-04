@@ -43,6 +43,7 @@ dependencies:
   google_generative_ai: ^0.2.2
   flutter_popup_card:
   sqflite: ^2.0.0+4
+  rive: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -70,8 +71,11 @@ flutter:
   assets:
     - .env
     - assets/images/oraculum_logo.png
+    - assets/images/OraculumLogoFreeApp.png
+    - assets/images/OraculumLogoPremiumApp.png
     - assets/images/imagem.jpeg
     - assets/images/hieroglifo.jpeg
+    - assets/animation/EyeOfRah.riv
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

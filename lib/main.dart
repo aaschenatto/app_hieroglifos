@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter_application_3/buttons.dart';
 import 'package:flutter_application_3/database/dao/history_dao.dart';
 import 'package:flutter_application_3/historico.dart';
 import 'package:flutter_application_3/model/history_model.dart';
+import 'package:flutter_application_3/splashscreen.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,7 +25,7 @@ void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   _cameras = await availableCameras();
   await dotenv.load(fileName: ".env");
-  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: TelaInicial()));
+  runApp(MaterialApp(debugShowCheckedModeBanner: false, home: SplashScreen()));
 }
 
 class TelaInicial extends StatefulWidget {
@@ -37,6 +39,7 @@ class _TelaInicialState extends State<TelaInicial> {
   XFile? savedImage;
 
   bool _isCameraInitialized = false;
+  bool isPremium = false;
   String? _imagePath;
   bool _isLoading = false;
   final TextEditingController _textController = TextEditingController();
@@ -189,13 +192,35 @@ class _TelaInicialState extends State<TelaInicial> {
     return "Histórico salvo localmente: ${novo.texto}";
   }
 
+  void turnPremium() {
+    isPremium = !isPremium;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(
-          child: Image.asset('assets/images/oraculum_logo.png', height: 48),
-        ),
+        title: isPremium
+            ? Image.asset(
+                'assets/images/OraculumLogoPremiumApp.png',
+                height: 32,
+              )
+            : Image.asset('assets/images/OraculumLogoFreeApp.png', height: 32),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                turnPremium();
+              });
+            },
+            icon: Icon(
+              Icons.workspace_premium,
+              color: Color(0xFFFFD700),
+              size: 32,
+            ),
+          ),
+        ],
         backgroundColor: Color(0xffBEA073),
         elevation: 2,
       ),
@@ -246,133 +271,258 @@ class _TelaInicialState extends State<TelaInicial> {
                     padding: const EdgeInsets.all(8.0),
                     child: CircularProgressIndicator(),
                   ),
-                DropdownMenu<int>(
-                  initialSelection: idioma, // valor inicial selecionado
-                  onSelected: (int? value) {
-                    setState(() {
-                      idioma = value ?? 1; // se for null, mantém 1
-                    });
-                  },
-                  dropdownMenuEntries: const <DropdownMenuEntry<int>>[
-                    DropdownMenuEntry(value: 1, label: "Português"),
-                    DropdownMenuEntry(value: 2, label: "Español"),
-                    DropdownMenuEntry(value: 3, label: "English"),
-                  ],
-                ),
+
+                isPremium == false
+                    ? SizedBox()
+                    : Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xffBEA073), Color(0xff8E6B32)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 6,
+                              offset: const Offset(2, 4),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        child: DropdownMenu<int>(
+                          initialSelection: idioma,
+                          onSelected: (int? value) {
+                            setState(() {
+                              idioma = value ?? 1;
+                            });
+                          },
+                          width: 220,
+                          menuStyle: MenuStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                              const Color(0xffF8F8F8),
+                            ),
+                            elevation: MaterialStateProperty.all(6),
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          inputDecorationTheme: const InputDecorationTheme(
+                            border: InputBorder.none,
+                          ),
+                          trailingIcon: const Icon(
+                            Icons.language,
+                            color: Colors.white,
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                          dropdownMenuEntries: const <DropdownMenuEntry<int>>[
+                            DropdownMenuEntry(
+                              value: 1,
+                              label: "🇧🇷  Português",
+                            ),
+                            DropdownMenuEntry(value: 2, label: "🇪🇸  Español"),
+                            DropdownMenuEntry(value: 3, label: "🇺🇸  English"),
+                          ],
+                        ),
+                      ),
+                SizedBox(height: 24),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: Color(0xffBEA073),
-                            width: 2.0,
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          onPressed: _isLoading
-                              ? null
-                              : () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => InicialHistory(),
-                                    ),
-                                  );
-                                },
-                          icon: Icon(Icons.history_edu),
-                        ),
-                      ),
-                      SizedBox(width: 24),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: Color(0xffBEA073),
-                            width: 2.0,
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          onPressed: () async {
-                            if (_isLoading) return;
-
-                            setState(() {
-                              _isLoading = true;
-                            });
-
-                            try {
-                              // Chama _takePicture() e envia para o Gemini
-
-                              final result = await _takePicture();
-
-                              await postarHistory(result, _imagePath!);
-
-                              if (!mounted) return;
-
-                              showPopupCard(
-                                context: context,
-                                builder: (context) {
-                                  return PopupCard(
-                                    child: Padding(
-                                      padding: EdgeInsetsGeometry.all(15),
-                                      child: SizedBox(
-                                        height: 360,
-                                        width: 210,
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              "Resultado da Verificação:",
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
+                  child:
+                      // Row(
+                      //   mainAxisAlignment: MainAxisAlignment.center,
+                      //   children: [
+                      //     Container(
+                      //       decoration: BoxDecoration(
+                      //         color: Colors.white,
+                      //         border: Border.all(
+                      //           color: Color(0xffBEA073),
+                      //           width: 2.0,
+                      //         ),
+                      //         shape: BoxShape.circle,
+                      //       ),
+                      //       child: IconButton(
+                      //         onPressed: _isLoading
+                      //             ? null
+                      //             : () {
+                      //                 Navigator.push(
+                      //                   context,
+                      //                   MaterialPageRoute(
+                      //                     builder: (context) => InicialHistory(),
+                      //                   ),
+                      //                 );
+                      //               },
+                      //         icon: Icon(Icons.history_edu),
+                      //       ),
+                      //     ),
+                      //     SizedBox(width: 24),
+                      //     Container(
+                      //       decoration: BoxDecoration(
+                      //         color: Colors.white,
+                      //         border: Border.all(
+                      //           color: Color(0xffBEA073),
+                      //           width: 2.0,
+                      //         ),
+                      //         shape: BoxShape.circle,
+                      //       ),
+                      //       child: IconButton(
+                      //         onPressed: () async {
+                      //           if (_isLoading) return;
+                      //           setState(() {
+                      //             _isLoading = true;
+                      //           });
+                      //           try {
+                      //             // Chama _takePicture() e envia para o Gemini
+                      //             final result = await _takePicture();
+                      //             await postarHistory(result, _imagePath!);
+                      //             if (!mounted) return;
+                      //             showPopupCard(
+                      //               context: context,
+                      //               builder: (context) {
+                      //                 return PopupCard(
+                      //                   child: Padding(
+                      //                     padding: EdgeInsetsGeometry.all(15),
+                      //                     child: SizedBox(
+                      //                       height: 360,
+                      //                       width: 210,
+                      //                       child: Column(
+                      //                         children: [
+                      //                           Text(
+                      //                             "Resultado da Verificação:",
+                      //                             style: TextStyle(
+                      //                               fontWeight: FontWeight.bold,
+                      //                             ),
+                      //                           ),
+                      //                           Text(result ?? 'Sem resposta'),
+                      //                           //fazer o card no outro botao so dando o result como a foto escolhida
+                      //                         ],
+                      //                       ),
+                      //                     ),
+                      //                   ),
+                      //                 );
+                      //               },
+                      //             );
+                      //             if (result != null && _image?.path != null) {
+                      //               await postarHistory(result, _image!.path);
+                      //             }
+                      //           } catch (e) {
+                      //             print('Erro: $e');
+                      //           } finally {
+                      //             setState(() {
+                      //               _isLoading = false;
+                      //             });
+                      //           }
+                      //         },
+                      //         icon: Icon(Icons.camera_enhance_rounded),
+                      //       ),
+                      //     ),
+                      //     SizedBox(width: 24),
+                      //     Container(
+                      //       decoration: BoxDecoration(
+                      //         color: Colors.white,
+                      //         border: Border.all(
+                      //           color: Color(0xffBEA073),
+                      //           width: 2.0,
+                      //         ),
+                      //         shape: BoxShape.circle,
+                      //       ),
+                      //       child: IconButton(
+                      //         onPressed: _isLoading ? null : _pickImage,
+                      //         icon: Icon(Icons.photo_library_rounded),
+                      //       ),
+                      //     ),
+                      //     SizedBox(width: 0, height: 100),
+                      //   ],
+                      // ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          isPremium == false
+                              ? SizedBox()
+                              : CustomIconButton(
+                                  icon: Icons.history_edu,
+                                  label: "Histórico",
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => InicialHistory(),
+                                      ),
+                                    );
+                                  },
+                                ),
+                          const SizedBox(width: 24),
+                          CustomIconButton(
+                            icon: Icons.camera_enhance_rounded,
+                            label: "Câmera",
+                            onPressed: () async {
+                              if (_isLoading) return;
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              try {
+                                // Chama _takePicture() e envia para o Gemini
+                                final result = await _takePicture();
+                                await postarHistory(result, _imagePath!);
+                                if (!mounted) return;
+                                showPopupCard(
+                                  context: context,
+                                  builder: (context) {
+                                    return PopupCard(
+                                      child: Padding(
+                                        padding: EdgeInsetsGeometry.all(15),
+                                        child: SizedBox(
+                                          height: 360,
+                                          width: 210,
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                "Resultado da Verificação:",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
-                                            ),
-                                            Text(result ?? 'Sem resposta'),
-                                            //fazer o card no outro botao so dando o result como a foto escolhida
-                                          ],
+                                              Text(result ?? 'Sem resposta'),
+                                              //fazer o card no outro botao so dando o result como a foto escolhida
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
-                              );
-                              if (result != null && _image?.path != null) {
-                                await postarHistory(result, _image!.path);
+                                    );
+                                  },
+                                );
+                                if (result != null && _image?.path != null) {
+                                  await postarHistory(result, _image!.path);
+                                }
+                              } catch (e) {
+                                print('Erro: $e');
+                              } finally {
+                                setState(() {
+                                  _isLoading = false;
+                                });
                               }
-                            } catch (e) {
-                              print('Erro: $e');
-                            } finally {
-                              setState(() {
-                                _isLoading = false;
-                              });
-                            }
-                          },
-
-                          icon: Icon(Icons.camera_enhance_rounded),
-                        ),
-                      ),
-                      SizedBox(width: 24),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(
-                            color: Color(0xffBEA073),
-                            width: 2.0,
+                            },
                           ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          onPressed: _isLoading ? null : _pickImage,
-                          icon: Icon(Icons.photo_library_rounded),
-                        ),
+                          const SizedBox(width: 24),
+                          CustomIconButton(
+                            icon: Icons.photo_library_rounded,
+                            label: "Galeria",
+                            onPressed: () {
+                              _isLoading ? null : _pickImage();
+                            },
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 0, height: 100),
-                    ],
-                  ),
                 ),
               ],
             )

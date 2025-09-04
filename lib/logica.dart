@@ -1,5 +1,4 @@
 import 'package:flutter_application_3/database/dao/history_dao.dart';
-import 'package:flutter_application_3/model/history_model.dart';
 
 import './main.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';

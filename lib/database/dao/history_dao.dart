@@ -1,5 +1,5 @@
-import 'package:http/http.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:flutter/foundation.dart';
+
 import '../database.dart';
 import '../../model/history_model.dart';
 
@@ -36,6 +36,6 @@ class HistoryDao {
     final novo = History(texto: texto, imagePath: null);
 
     await dao.inserir(novo);
-    print("Histórico salvo localmente: ${novo.texto}");
+    debugPrint("Histórico salvo localmente: ${novo.texto}");
   }
 }
